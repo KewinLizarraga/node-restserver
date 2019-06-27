@@ -15,9 +15,11 @@ app.use(bodyParse.json());
 app.use(require('./routes/usuario'));
 
 // Connecting to MongoDB
-mongoose.connect('mongodb://localhost:27017/cafe', (err, res)=> {
-    if (err) throw err;
-    console.log('Base de datos ONLINE en en puerto: 27017');
+mongoose.connect(process.env.URLDB,
+                {useNewUrlParser: true, useCreateIndex: true},
+                (err, res)=> {
+                    if (err) throw err;
+                    console.log('Base de datos ONLINE en en puerto: 27017');
 });
 
 app.listen(process.env.PORT, ()=> console.log(`Escuchando en el puerto: ${process.env.PORT}`));

@@ -1,12 +1,39 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
+const _ = require('underscore');
 
 const Usuario = require('../models/usuario');
 
 const app = express();
 
 app.get('/usuario', (req, res)=> {
-    res.json('get Usuario');
+    // { estado: true }
+
+    let desde = req.query.desde || 0;
+    desde = Number(desde);
+    
+    let limite = req.query.limite || 5;
+    limite = Number(limite);
+
+    Usuario.find({estado: true}, 'nombre email role estado google img')
+            .skip(desde)
+            .limit(limite)
+            .exec((err, usuario)=> {
+                if (err) {
+                    return res.status(400).json({
+                        ok: false,
+                        err
+                    });
+                }
+
+                Usuario.count({estado: true}, (err, conteo)=> {
+                    res.json({
+                        ok: true,
+                        cuantos: conteo,
+                        usuario
+                    });
+                });
+            });
 });
 // POST --> para crear nuevos Registros
 app.post('/usuario', (req, res)=> {
@@ -38,9 +65,9 @@ app.post('/usuario', (req, res)=> {
     })
 });
 // PUT --> para actualizar los registros
-app.put('/usuario/:idx', (req, res)=> {
+app.put('/usuario/:id', (req, res)=> {
     let id = req.params.idx;
-    let body = req.body;
+    let body = _.pick(req.body, ['nombre','email','img','role','estado']);
 
     Usuario.findByIdAndUpdate(id, body, {new: true, runValidators: true}, (err, usuarioDB)=> {
         if (err) {
@@ -56,9 +83,61 @@ app.put('/usuario/:idx', (req, res)=> {
         });
     })
 });
+// DELETE --> para eliminar los registros
+app.delete('/usuario/:id', (req, res)=> {
+    let id = req.params.id;
 
-app.delete('/usuario', (req, res)=> {
-    res.json('delete Usuario');
+    // Elimina el registro fisicamente en la DB
+    // Usuario.findByIdAndRemove(id, (err, usuarioDel)=> {
+    //     if (err) {
+    //         return res.status(400).json({
+    //             ok: false,
+    //             err
+    //         });
+    //     }
+
+    //     if (!usuarioDel) {
+    //         return res.status(400).json({
+    //             ok: false,
+    //             err: {
+    //                 message: 'Usuario no es encontrado'
+    //             }
+    //         });
+    //     }
+
+    //     res.json({
+    //         ok: true,
+    //         usuario: usuarioDel
+    //     });
+    // });
+
+    // Eliminar (cambiar el estado de true a false)
+    let cambiaEstado = {
+        estado: false
+    }
+
+    Usuario.findByIdAndUpdate(id, cambiaEstado, {new: true}, (err, usuarioDel)=> {
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err
+            });
+        }
+        
+        if (!usuarioDel) {
+            return res.status(400).json({
+                ok: false,
+                err: {
+                    message: 'Usuario no es encontrado'
+                }
+            });
+        }
+
+        res.json({
+            ok: true,
+            usuario: usuarioDel
+        })
+    })
 });
 
 module.exports = app;
