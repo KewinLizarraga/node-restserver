@@ -3,11 +3,16 @@ const bcrypt = require('bcrypt');
 const _ = require('underscore');
 
 const Usuario = require('../models/usuario');
+const { verificaToken, verificaAdmin_Role } = require('../middlewares/autenticacion');
 
 const app = express();
 
-app.get('/usuario', (req, res)=> {
-    // { estado: true }
+app.get('/usuario', verificaToken, (req, res)=> {
+    // return res.json({
+    //     usuario: req.usuario,
+    //     name: req.usuario.nombre,
+    //     mail: req.usuario.email
+    // });
 
     let desde = req.query.desde || 0;
     desde = Number(desde);
@@ -36,7 +41,7 @@ app.get('/usuario', (req, res)=> {
             });
 });
 // POST --> para crear nuevos Registros
-app.post('/usuario', (req, res)=> {
+app.post('/usuario', [verificaToken, verificaAdmin_Role], (req, res)=> {
     let body = req.body;
     
     // Crea una nueva instancia de ese esquema (esquema Usuario)
@@ -46,13 +51,14 @@ app.post('/usuario', (req, res)=> {
         password: bcrypt.hashSync(body.password, 10),
         role: body.role
     })
+
     // Guardamos en la DB
     usuario.save((err, usuarioDB)=> {
         if (err) {
             return res.status(400).json({
                 ok: false,
                 err
-            })
+            });
         }
 
         // usuarioDB.password = null,
@@ -61,11 +67,11 @@ app.post('/usuario', (req, res)=> {
         res.json({
             ok: true,
             usuario: usuarioDB
-        })
-    })
+        });
+    });    
 });
 // PUT --> para actualizar los registros
-app.put('/usuario/:id', (req, res)=> {
+app.put('/usuario/:id', [verificaToken, verificaAdmin_Role], (req, res)=> {
     let id = req.params.idx;
     let body = _.pick(req.body, ['nombre','email','img','role','estado']);
 
@@ -84,7 +90,7 @@ app.put('/usuario/:id', (req, res)=> {
     })
 });
 // DELETE --> para eliminar los registros
-app.delete('/usuario/:id', (req, res)=> {
+app.delete('/usuario/:id', [verificaToken, verificaAdmin_Role], (req, res)=> {
     let id = req.params.id;
 
     // Elimina el registro fisicamente en la DB
