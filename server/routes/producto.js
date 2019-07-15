@@ -62,11 +62,18 @@ app.get('/producto/:id', verificaToken, (req, res)=> {
                     });
                 }
 
-                res.json({
-                    ok: true,
-                    // producto: productoDB,
-                    mensaje: 'El producto no esta disponible'
-                });
+                if (!productoDB.disponible) {
+                    res.json({
+                        ok: true,
+                        mensaje: 'El producto no esta disponible'
+                    })
+                } else {
+                    res.json({
+                        ok: true,
+                        producto: productoDB,
+                    });                    
+                }
+
             });
 });
 // =============================
