@@ -1,12 +1,12 @@
 // =====================================
 // Puerto
 // =====================================
-process.env.PORT = process.env.PORT || 3000;
+process.env.PORT = process.env.PORT;
 
 // =====================================
 // Entorno
 // =====================================
-process.env.NODE_ENV = process.env.NODE_ENV || 'dev';
+process.env.NODE_ENV = process.env.NODE_ENV;
 
 // =====================================
 // Vencimiento del Token
@@ -20,7 +20,7 @@ process.env.CADUCIDAD_TOKEN = '168h';
 // =====================================
 // SEED de autentificación
 // =====================================
-process.env.SEED = process.env.SEED || 'este-es-el-seed-desarrollo';
+process.env.SEED = process.env.SEED;
 
 // =====================================
 // Base de Datos
@@ -38,4 +38,4 @@ process.env.URLDB = urlDB;
 // =====================================
 // Gloogle Client ID
 // =====================================
-process.env.CLIENT_ID = process.env.CLIENT_ID || '289454369783-46ioog6vg1dkovdoc5q2vfpq6e5gbj1i.apps.googleusercontent.com';
+process.env.CLIENT_ID = process.env.CLIENT_ID;
